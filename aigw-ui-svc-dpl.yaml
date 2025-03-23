@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui
+  namespace: ai-gateway
+spec:
+  selector:
+    app: ui
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui
+  namespace: ai-gateway
+  labels:
+    app: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui
+  template:
+    metadata:
+      labels:
+        app: ui
+    spec:
+      serviceAccountName: aigw
+      hostAliases:
+      - ip: "13.228.26.225"
+        hostnames:
+        - "aigw.example.com"
+      containers:
+        - name: ui
+          image: michelangelodorado/aigw-ui:v0.1.0
+          ports:
+            - name: http
+              containerPort: 8400
+              protocol: TCP
+          env:
+            - name: AIGW_API_URL
+              value: http://a3c1eda864a51496b99400956a1e829c-881129171.ap-southeast-1.elb.amazonaws.com
+          resources: {}
